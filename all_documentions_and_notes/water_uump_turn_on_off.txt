@@ -1,0 +1,12 @@
+let moi = parseFloat(msg.moi);
+let autoWater = flow.get("autoWatering");
+
+if (autoWater && moi < 60) {
+    msg.payload = "on";  // to turn relay ON
+} else if (autoWater && moi >= 80){
+    msg.payload = "off"; // to turn relay OFF
+}else{
+    return null;
+}
+
+return msg;  // send this to the next node (like MQTT OUT)

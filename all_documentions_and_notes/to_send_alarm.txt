@@ -1,0 +1,43 @@
+let temp = parseFloat(msg.temp);
+let moi = parseFloat(msg.moi);
+let ph = parseFloat(msg.ph);
+let ec = parseFloat(msg.ec);
+
+let tempNotified = flow.get("tempNotified") || false;
+let moiNotified = flow.get("moiNotified") || false;
+let phNotified = flow.get("phNotified") || false;
+let ecNotified = flow.get("ecNotified") || false;
+
+let alerts = [];
+
+if ((temp < 15 || temp > 30) && !tempNotified) {
+    alerts.push(`Temp: ${temp}°C`);
+    flow.set("tempNotified", true);
+}
+
+if (moi < 80 && !moiNotified) {
+    alerts.push(`Moisture: ${moi}%`);
+    flow.set("moiNotified", true);
+}
+
+if ((ph < 5.5 || ph >= 7.5) && !phNotified) {
+    alerts.push(`Soil pH: ${ph}`);
+    flow.set("phNotified", true);
+}
+
+if ((ec < 50 || ec > 500 ) && !ecNotified) {
+    alerts.push(`Soil conductivity: ${ec}μS/cm`);
+    flow.set("ecNotified", true);
+}
+
+if (alerts.length > 0) {
+    msg.payload = `⚠️ Alert!\n` + alerts.join("\n");
+    return msg;
+}
+
+if (temp >= 15 && temp <= 30) flow.set("tempNotified", false);
+if (moi >= 80) flow.set("moiNotified", false);
+if (ph >= 5.5 && ph < 7.5) flow.set("phNotified", false);
+if (ec >= 50 && ec <= 500) flow.set("ecNotified", false);
+
+return null;

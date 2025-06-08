@@ -1,0 +1,802 @@
+kiosk_mode:
+  non_admin_settings:
+    hide_header: true
+    ignore_entity_settings: true
+views:
+  - title: Main
+    type: masonry
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: custom:button-card
+            icon: mdi:information-outline
+            tap_action:
+              action: navigate
+              navigation_path: info
+            show_name: false
+            styles:
+              card:
+                - width: 32px
+                - height: 32px
+                - border-radius: 80%
+                - background: '#fffff0'
+                - box-shadow: none
+                - margin-left: 5px
+                - margin-right: 1px
+                - margin-top: 8px
+              icon:
+                - color: '#7a697c'
+                - width: 24px
+                - height: 24px
+          - type: picture
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            image: /api/image/serve/e347c7ce5fd1ad841988c21aab328391/512x512
+            card_mod:
+              style: |
+                ha-card {
+                  border: white;
+                  background: transparent;
+                  box-shadow: none;
+                }
+                ha-card img {
+                  height: 100px;
+                  width: 385px;
+                  filter: brightness(0.8) contrast(0.9)
+                  object-fit: cover;
+                }
+      - type: custom:mushroom-template-card
+        primary: |-
+          {%set time = now().hour%}
+          {%if(time>=18)%}
+           Good Evening, {{user}}!
+          {%elif(time>=12)%}
+           Good Afternoon, {{user}}!
+          {%elif(time>=5)%}
+           Good Morning, {{user}}!
+          {%else%}
+           Hello,{{user}}
+          {%endif%}
+        secondary: ''
+        icon: mdi:home-account
+        fill_container: false
+        multiline_secondary: false
+        icon_color: blue
+        badge_color: ''
+        tap_action:
+          action: navigate
+          navigation_path: /profile
+        layout: vertical
+        card_mod:
+          style: |
+            ha-card {
+              border-radius: 12px;
+              border: none;
+              box-shadow: 0px 4px 12px rgba(53,2,132,0.2);
+              background: #FFFFF0;
+            }
+            :host {
+              --primary-text-color: black; /* Apply text color here */
+            }
+      - type: markdown
+        content: '### 🌱 Real Soil Data'
+        text_only: true
+        card_mod:
+          style: |
+            ha-markdown {
+              color: black;
+            }
+      - type: horizontal-stack
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: custom:mini-graph-card
+                name: Soil Moisture
+                icon: mdi:water
+                entities:
+                  - entity: sensor.esp32_moisture
+                line_width: 10
+                line_color: '#4FC3F7'
+                height: 180
+                hours_to_show: 24
+                align_icon: left
+                align_header: left
+                animate: true
+                points_per_hour: 1
+                show:
+                  points: false
+                  labels: false
+                card_mod:
+                  style: |
+                    :host {
+                      {% set val = states('sensor.esp32_moisture') | float() %}
+
+                      /* Icon and background color contrast combos */
+                      {% if val < 80 %}
+                        --state-color: #ee2c3d;         /* Bright red */
+                      {% else %}
+                        --state-color: #502847;         
+                      {% endif %}
+                    }
+
+                    ha-card {
+                      border-radius: 12px;
+                      border: none;
+                      box-shadow: 0px 4px 12px rgba(53,2,132,0.2);
+                      background: #FFFFF0;
+                    }
+
+                    ha-card .icon {
+                      color: #4FC3F7;
+                      transform: scale(1.3);
+                      transform-origin: left center;
+                      margin-top: 6px;
+                    }
+
+                    ha-card .state {
+                      color: #502847;
+                      font-weight: bold;
+                      font-family: Poppin;
+                      margin-left: 40px;
+                      margin-top: -80px;
+                      font-size: 12px;
+                    }
+
+                    ha-card .name {
+                      font-family: Raleway;
+                      color: black;
+                      opacity: 1;
+                      font-size: 16px;
+                      text-shadow: 0 0 1px #ccc;
+                      margin-left: 8px;
+                      margin-top: 35px;
+                    }
+
+                    span.state__uom {
+                      opacity: 0.9;
+                    }
+              - type: markdown
+                content: |
+                  {% set moisture = states('sensor.esp32_moisture') | float %} 
+                  {% if moisture < 60 %}
+                    **Too Dry**
+                  {% else %}
+                    **Healthy**
+                  {% endif %}
+                text_only: true
+                card_mod:
+                  style: |
+                    :host {
+                      {% set moisture = states('sensor.esp32_moisture') | float() %}
+
+                      /* Icon and background color contrast combos */
+                      {% if moisture < 60 %}
+                        --moisture-color: #E53935;        /* Red – Too Dry */
+                      {% else %}
+                        --moisture-color: #26A69A;        /* Teal – Healthy */
+                      {% endif %}
+                    }
+                    ha-card {
+                      color: var(--moisture-color);
+                      background: none;
+                      box-shadow: none;
+                      text-align: center;
+                      font-size: 14px;
+                      padding-top: 0px;
+                      margin-top: -110px;
+                      margin-left: -20px
+                    }
+          - type: vertical-stack
+            cards:
+              - type: custom:mini-graph-card
+                name: Soil pH
+                icon: mdi:sprout
+                entities:
+                  - entity: sensor.esp32_ph
+                line_color: '#55aa55'
+                line_width: 10
+                height: 180
+                hours_to_show: 24
+                align_icon: left
+                align_header: left
+                animate: true
+                points_per_hour: 1
+                show:
+                  points: false
+                  labels: false
+                card_mod:
+                  style: |
+                    :host {
+                      {% set val = states('sensor.esp32_ph') | float(999) %}
+
+                      /* Icon and background color contrast combos */
+                      {% if val < 30 %}
+                        --icon-color: #ff0000;         /* Bright red */
+                        --icon-bg-color: #ffe5e5;      /* Light red */
+                      {% elif val < 60 %}
+                        --icon-color: #ff8c00;         /* Dark orange */
+                        --icon-bg-color: #fff0d6;      /* Light orange */
+                      {% else %}
+                        --icon-color: #008000;         /* Green */
+                        --icon-bg-color: #e0ffe0;      /* Light green */
+                      {% endif %}
+                    }
+
+                    ha-card {
+                      border-radius: 12px;
+                      border: none;
+                      box-shadow: 0px 4px 12px rgba(53,2,132,0.2);
+                      background: #FFFFF0;
+                    }
+
+                    ha-card .icon {
+                      color: #55aa55;
+                      transform: scale(1.3);
+                      transform-origin: left center;
+                      margin-top: 6px;
+                    }
+
+                    ha-card .state {
+                      color: #502847;
+                      font-weight: bold;
+                      font-family: Poppin;
+                      margin-left: 40px;
+                      margin-top: -80px;
+                      font-size: 12px;
+                    }
+
+                    ha-card .name {
+                      font-family: Raleway;
+                      color: black;
+                      opacity: 1;
+                      font-size: 16px;
+                      text-shadow: 0 0 1px #ccc;
+                      margin-left: 8px;
+                      margin-top: 35px;
+                    }
+
+                    span.state__uom {
+                      opacity: 0.9;
+                    }
+              - type: markdown
+                content: |
+                  {% set ph = states('sensor.esp32_ph') | float() %} 
+                  {% if ph < 5.5 %}
+                    **Too Acidic**
+                  {% elif ph <= 7.0 %}
+                    **Ideal**
+                  {% elif ph <= 7.5 %}
+                    **Slightly Alkaline**
+                  {% else %}
+                    **Too Alkaline**
+                  {% endif %}
+                text_only: true
+                card_mod:
+                  style: |
+                    :host {
+                      {% set ph = states('sensor.esp32_ph') | float() %}
+
+                      /* Icon and background color contrast combos */
+                      {% if ph < 5.5 %}
+                        --ph-color: #E53935;        /* Red – Too Acidic */
+                      {% elif ph <= 7.0 %}
+                        --ph-color: #26A69A;        /* Teal – Ideal */
+                      {% elif ph <= 7.5 %}
+                        --ph-color: #FBC02D;        /* Yellow – Slightly Alkaline */
+                      {% else %}
+                        --ph-color: #B71C1C;        /* Dark Red – Too Alkaline */
+                      {% endif %}
+                    }
+
+                    ha-card {
+                      color: var(--ph-color);
+                      background: none;
+                      box-shadow: none;
+                      text-align: center;
+                      font-size: 14px;
+                      padding-top: 0px;
+                      margin-top: -110px;
+                      margin-left: -35px;
+                    }
+      - type: horizontal-stack
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: custom:mini-graph-card
+                name: Soil Temperature
+                icon: mdi:thermometer
+                entities:
+                  - entity: sensor.esp32_temperature
+                line_width: 10
+                line_color: '#ffa726'
+                height: 180
+                hours_to_show: 24
+                align_icon: left
+                align_header: left
+                animate: true
+                points_per_hour: 1
+                show:
+                  points: false
+                  labels: false
+                card_mod:
+                  style: |
+                    :host {
+                      {% set val = states('sensor.esp32_temperature') | float() %}
+
+                      /* Icon and background color contrast combos */
+                      {% if val < 80 %}
+                        --state-color: #ee2c3d;         /* Bright red */
+                      {% else %}
+                        --state-color: #502847;         
+                      {% endif %}
+                    }
+
+                    ha-card {
+                      border-radius: 12px;
+                      border: none;
+                      box-shadow: 0px 4px 12px rgba(53,2,132,0.2);
+                      background: #FFFFF0;
+                    }
+
+                    ha-card .icon {
+                      color: #ffa726;
+                      transform: scale(1.3);
+                      transform-origin: left center;
+                      margin-top: 6px;
+                    }
+
+                    ha-card .state {
+                      color: #502847;
+                      font-weight: bold;
+                      font-family: Poppin;
+                      margin-left: 40px;
+                      margin-top: -80px;
+                      font-size: 12px;
+                    }
+
+                    ha-card .name {
+                      font-family: Raleway;
+                      color: black;
+                      opacity: 1;
+                      font-size: 15px;
+                      text-shadow: 0 0 1px #ccc;
+                      margin-left: 8px;
+                      margin-top: 35px;
+                    }
+
+                    span.state__uom {
+                      opacity: 0.9;
+                    }
+              - type: markdown
+                content: |
+                  {% set temp = states('sensor.esp32_temperature') | float %} 
+
+                  {% if temp < 15 %}
+                    **Too Cold**
+                  {% elif temp <= 30 %}
+                    **Ideal**
+                  {% else %}
+                    **Too Hot**
+                  {% endif %}
+                text_only: true
+                card_mod:
+                  style: |
+                    :host {
+                      {% set temp = states('sensor.esp32_temperature') | float() %}
+
+                      /* Icon and background color contrast combos */
+                      {% if temp < 15 %}
+                        --temp-color: #42A5F5;        /* Blue */
+                      {% elif temp <= 30 %}
+                        --temp-color: #26A69A;        /* Teal (Ideal) */
+                      {% else %}
+                        --temp-color: #E53935;        /* Red */
+                      {% endif %}
+                    }
+                    ha-card {
+                      color: var(--temp-color);
+                      background: none;
+                      box-shadow: none;
+                      text-align: center;
+                      font-size: 14px;
+                      padding-top: 0px;
+                      margin-top: -110px;
+                      margin-left: -35px;
+                    }
+          - type: vertical-stack
+            cards:
+              - type: custom:mini-graph-card
+                name: Soil EC
+                icon: mdi:atom-variant
+                entities:
+                  - entity: sensor.esp32_conductivity
+                line_color: '#ba68c8'
+                line_width: 10
+                height: 180
+                hours_to_show: 24
+                align_icon: left
+                align_header: left
+                animate: true
+                points_per_hour: 1
+                show:
+                  points: false
+                  labels: false
+                card_mod:
+                  style: |
+                    :host {
+                      {% set val = states('sensor.esp32_conductivity') | float(999) %}
+
+                      /* Icon and background color contrast combos */
+                      {% if val < 30 %}
+                        --icon-color: #ff0000;         /* Bright red */
+                        --icon-bg-color: #ffe5e5;      /* Light red */
+                      {% elif val < 60 %}
+                        --icon-color: #ff8c00;         /* Dark orange */
+                        --icon-bg-color: #fff0d6;      /* Light orange */
+                      {% else %}
+                        --icon-color: #008000;         /* Green */
+                        --icon-bg-color: #e0ffe0;      /* Light green */
+                      {% endif %}
+                    }
+
+                    ha-card {
+                      border-radius: 12px;
+                      border: none;
+                      box-shadow: 0px 4px 12px rgba(53,2,132,0.2);
+                      background: #FFFFF0;
+                    }
+
+                    ha-card .icon {
+                      color: #ba68c8;
+                      transform: scale(1.3);
+                      transform-origin: left center;
+                      margin-top: 6px;
+                    }
+
+                    ha-card .state {
+                      color: #502847;
+                      font-weight: bold;
+                      font-family: Poppin;
+                      margin-left: 40px;
+                      margin-top: -80px;
+                      font-size: 12px;
+                    }
+
+                    ha-card .name {
+                      font-family: Raleway;
+                      color: black;
+                      opacity: 1;
+                      font-size: 15px;
+                      text-shadow: 0 0 1px #ccc;
+                      margin-left: 8px;
+                      margin-top: 35px;
+                    }
+
+                    span.state__uom {
+                      opacity: 0.9;
+                    }
+              - type: markdown
+                content: >
+                  {% set ec = states('sensor.esp32_conductivity') | float() %} 
+                  {% if ec < 1100 %}
+                    **Too Low**
+                  {% elif ec <= 5700 %}
+                    **Ideal**
+                  {% else %}
+                    **Too High**
+                  {% endif %}
+                text_only: true
+                card_mod:
+                  style: |
+                    :host {
+                      {% set ec = states('sensor.esp32_conductivity') | float() %}
+
+                      /* Icon and background color contrast combos */
+                      {% if ec < 1100 %}
+                        --ec-color: #42A5F5;        /* Blue – Too Low */
+                      {% elif ec <= 5700 %}
+                        --ec-color: #26A69A;        /* Teal – Ideal */
+                      {% else %}
+                        --ec-color: #E53935;        /* Red – Too High */
+                      {% endif %}
+                    }
+                    ha-card {
+                      color: var(--ec-color);
+                      background: none;
+                      box-shadow: none;
+                      text-align: center;
+                      font-size: 14px;
+                      padding-top: 0px;
+                      margin-top: -110px;
+                      margin-left: -35px
+                    }
+      - type: markdown
+        content: '### 🌿 Controls'
+        text_only: true
+        card_mod:
+          style: |
+            ha-markdown {
+              color: black;
+            }
+      - type: vertical-stack
+        cards:
+          - type: custom:button-card
+            entity: input_boolean.fruiting
+            name: AutoWatering
+            show_icon: true
+            icon: mdi:cog
+            tap_action:
+              action: toggle
+            state:
+              - value: 'off'
+                icon: mdi:cog-off
+                styles:
+                  card:
+                    - background: '#FFFFF0'
+                  icon:
+                    - color: '#183B4E'
+                  name:
+                    - color: black
+                  custom_fields:
+                    state:
+                      - color: '#183B4E'
+              - value: 'on'
+                styles:
+                  card:
+                    - background: '#FFFFF0'
+            styles:
+              grid:
+                - grid-template-areas: '"i n icon" "state state state"'
+                - grid-template-columns: min-content min-content 1fr
+                - grid-template-rows: 1fr min-content
+              card:
+                - padding: 10px 20px
+                - border: none
+                - box-shadow: 0px 3px 12px rgba(53, 2, 132, 0.2)
+              name:
+                - justify-self: start
+                - font-family: Poppin
+                - font-size: 20px
+                - color: black
+                - opacity: '0.8'
+                - margin-left: 15px
+              icon:
+                - width: 24px
+                - color: '#183B4E'
+              img_cell:
+                - justify-self: start
+                - width: 24px
+                - height: 24px
+              custom_fields:
+                icon:
+                  - justify-self: end
+                  - margin-top: '-9px'
+                state:
+                  - justify-self: end
+                  - font-size: 22px
+                  - font-weight: bold
+                  - margin-top: '-9px'
+                  - margin-right: 12px
+                  - color: '#183B4E'
+                  - font-family: Poppin
+            custom_fields:
+              icon: |
+                [[[
+                  var state = entity.state;
+                  if(state == "on")
+                    return `<ha-icon icon="mdi:toggle-switch" style="color:#502847; width: 50px; height: 50px">`
+                  else
+                    return `<ha-icon icon="mdi:toggle-switch-off" style="color:#bbbbbb; width: 50px; height: 50px">`
+                ]]]
+              state: |
+                [[[
+                  var state = entity.state;
+                  if(state == "on")
+                    return `On`
+                  else
+                    return `Off`
+                ]]]
+          - type: custom:button-card
+            entity: switch.water_pump
+            name: Water Pump
+            show_icon: true
+            icon: mdi:water-pump
+            tap_action:
+              action: toggle
+            state:
+              - value: 'off'
+                icon: mdi:water-pump-off
+                styles:
+                  card:
+                    - background: '#FFFFF0'
+                  icon:
+                    - color: '#183B4E'
+                  name:
+                    - color: black
+                  custom_fields:
+                    state:
+                      - color: '#183B4E'
+              - value: 'on'
+                styles:
+                  card:
+                    - background: '#FFFFF0'
+            styles:
+              grid:
+                - grid-template-areas: '"i n icon" "state state state"'
+                - grid-template-columns: min-content min-content 1fr
+                - grid-template-rows: 1fr min-content
+              card:
+                - padding: 10px 20px
+                - border: none
+                - box-shadow: 0px 3px 12px rgba(53, 2, 132, 0.2)
+              name:
+                - justify-self: start
+                - font-size: 20px
+                - color: black
+                - opacity: '0.8'
+                - margin-left: 15px
+                - font-family: Poppin
+              icon:
+                - width: 24px
+                - color: '#183B4E'
+              img_cell:
+                - justify-self: start
+                - width: 24px
+                - height: 24px
+              custom_fields:
+                icon:
+                  - justify-self: end
+                  - margin-top: '-9px'
+                state:
+                  - justify-self: end
+                  - font-size: 22px
+                  - font-weight: bold
+                  - margin-top: '-9px'
+                  - margin-right: 12px
+                  - color: '#183B4E'
+                  - font-family: Poppin
+            custom_fields:
+              icon: |
+                [[[
+                  var state = entity.state;
+                  if(state == "on")
+                    return `<ha-icon icon="mdi:toggle-switch" style="color:#502847; width: 50px; height: 50px">`
+                  else
+                    return `<ha-icon icon="mdi:toggle-switch-off" style="color:#bbbbbb; width: 50px; height: 50px">`
+                ]]]
+              state: |
+                [[[
+                  var state = entity.state;
+                  if(state == "on")
+                    return `On`
+                  else
+                    return `Off`
+                ]]]
+    path: default_view
+    background:
+      opacity: 100
+      alignment: center
+      size: cover
+      repeat: repeat
+      attachment: fixed
+      image: /api/image/serve/26b01e37a7e847b33eb5da9b6da855a6/original
+  - type: panel
+    path: info
+    title: Info
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: custom:button-card
+            icon: mdi:arrow-left-circle
+            tap_action:
+              action: navigate
+              navigation_path: main
+            show_name: false
+            styles:
+              card:
+                - width: 32px
+                - height: 32px
+                - border-radius: 50%
+                - background: '#fffff0'
+                - box-shadow: none
+                - margin-left: 7px
+                - margin-right: 5px
+                - margin-top: 16px
+              icon:
+                - color: '#7a697c'
+                - width: 24px
+                - height: 24px
+          - type: markdown
+            content: >
+              ## ℹ️ How to Use This Dashboard
+
+
+              This dashboard helps you monitor soil conditions and control
+              watering efficiently. Here's a quick guide:
+
+
+              ---
+
+
+              ### 📊 Real Soil Data Section
+
+
+              - **Soil Moisture** and **Soil pH** values are shown.
+
+              - The graphs display a 24-hour trend for each sensor.
+
+              - Below each value, you'll see a **status label**:
+                - For *Soil Moisture*
+                  - `Too Dry`: soil needs attention.
+                  - `Healthy`: optimal condition.
+                - For *Soil pH*
+                  - `5.5-7.0(Ideal)`: Healthy growth and good fruit yield.
+                  - `< 5.5(Too Acidic)`: Poor root growth, nutrient loss.
+                  - `7.1 – 7.5 (Slightly Alkaline)`: Some nutrient issues, yellowing leaves.
+                  - `> 7.5 (Too Alkaline)`: Weak growth, poor fruit, nutrient lock.
+                - For *Soil Temperature*
+                  - `< 15°C (Too Cold)`: Slows root activity and nutrient absorption.
+                  - `15°C – 30°C (Ideal)`: Promotes healthy microbial and plant activity.
+                  - `> 30°C (Too Hot)`: May stress roots and reduce water retention.
+                - For *Soil EC (Electrical Conductivity)*
+                  - `< 1100 µS/cm (Too Low)`: Nutrient deficiency or overly clean soil.
+                  - `1100–5700 µS/cm (Ideal)`: Balanced nutrient presence.
+                  - `> 5700 µS/cm (Too High)`: Risk of salt buildup and nutrient lockout.
+              ---
+
+
+              ### ⚙️ Controls Section
+
+
+              #### 🌿 AutoWatering
+
+
+              - Toggle **ON** to enable automatic control based on soil moisture
+              level.
+
+              - The pump will activate only when moisture is too low.
+
+              - **Manual control is disabled when AutoWatering is ON.**
+
+
+              > Example: If moisture is sufficient, the pump turns OFF
+              automatically even if you manually switched it ON earlier.
+
+
+              #### 🚰 Water Pump (Manual)
+
+
+              - Can only be used when **AutoWatering is OFF**.
+
+              - Allows you to manually turn the pump ON or OFF.
+
+
+              ---
+
+
+              Stay green and let your plant thrive!
+            card_mod:
+              style: |
+                ha-card {
+                  --markdown-code-background-color: #ffffff;
+                  border-radius: 12px;
+                  border: none;
+                  box-shadow: 0px 4px 12px rgba(53,2,132,0.2);
+                  background: #FFFFF0;
+                  
+                  font-family: Raleway;
+                  margin-top:10px;
+                }
+                ha-markdown {
+                  color: black;
+                  font-size: 18px;
+                }
+    background:
+      opacity: 100
+      alignment: center
+      size: cover
+      repeat: repeat
+      attachment: fixed
+      image: /api/image/serve/021aab92dff5de5e7958fb1866f1ad56/original
